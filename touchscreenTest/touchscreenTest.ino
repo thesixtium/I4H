@@ -1,35 +1,3 @@
-/***********************************************************************************
-*This program is a demo of how to use the touch function in a phone GUI
-*This demo was made for LCD modules with 8bit or 16bit data port.
-*This program requires the the LCDKIWI library.
-
-* File                : display_phonecall.ino
-* Hardware Environment: Arduino UNO&Mega2560
-* Build Environment   : Arduino
-
-*Set the pins to the correct ones for your development shield or breakout board.
-*This demo use the BREAKOUT BOARD only and use these 8bit data lines to the LCD,
-*pin usage as follow:
-*                  LCD_CS  LCD_CD  LCD_WR  LCD_RD  LCD_RST  SD_SS  SD_DI  SD_DO  SD_SCK 
-*     Arduino Uno    A3      A2      A1      A0      A4      10     11     12      13                            
-*Arduino Mega2560    A3      A2      A1      A0      A4      10     11     12      13                           
-
-*                  LCD_D0  LCD_D1  LCD_D2  LCD_D3  LCD_D4  LCD_D5  LCD_D6  LCD_D7  
-*     Arduino Uno    8       9       2       3       4       5       6       7
-*Arduino Mega2560    8       9       2       3       4       5       6       7 
-
-*Remember to set the pins to suit your display module!
-*
-* @attention
-*
-* THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-* WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
-* TIME. AS A RESULT, QD electronic SHALL NOT BE HELD LIABLE FOR ANY
-* DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
-* FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE 
-* CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
-**********************************************************************************/
-
 #include <TouchScreen.h> //touch library
 #include <LCDWIKI_GUI.h> //Core graphics library
 #include <LCDWIKI_KBV.h> //Hardware-specific library
@@ -39,88 +7,41 @@ LCDWIKI_KBV my_lcd(ILI9486,A3,A2,A1,A0,A4); //model,cs,cd,wr,rd,reset
 //if the IC model is not known and the modules is readable,you can use this constructed function
 //LCDWIKI_KBV my_lcd(320,480,A3,A2,A1,A0,A4);//width,height,cs,cd,wr,rd,reset
 
-                             /*  r     g    b */
-#define BLACK        0x0000  /*   0,   0,   0 */
-#define BLUE         0x001F  /*   0,   0, 255 */
-#define RED          0xF800  /* 255,   0,   0 */
-#define GREEN        0x07E0  /*   0, 255,   0 */
-#define CYAN         0x07FF  /*   0, 255, 255 */
-#define MAGENTA      0xF81F  /* 255,   0, 255 */
-#define YELLOW       0xFFE0  /* 255, 255,   0 */
-#define WHITE        0xFFFF  /* 255, 255, 255 */
-#define NAVY         0x000F  /*   0,   0, 128 */
-#define DARKGREEN    0x03E0  /*   0, 128,   0 */
-#define DARKCYAN     0x03EF  /*   0, 128, 128 */
-#define MAROON       0x7800  /* 128,   0,   0 */
-#define PURPLE       0x780F  /* 128,   0, 128 */
-#define OLIVE        0x7BE0  /* 128, 128,   0 */
-#define LIGHTGREY    0xC618  /* 192, 192, 192 */
-#define DARKGREY     0x7BEF  /* 128, 128, 128 */
-#define ORANGE       0xFD20  /* 255, 165,   0 */
-#define GREENYELLOW  0xAFE5  /* 173, 255,  47 */
-#define PINK         0xF81F  /* 255,   0, 255 */
-
-/******************* UI details */
-#define BUTTON_R 35 //the radius of button 
-#define BUTTON_SPACING_X 35 //the horizontal distance between button
-#define BUTTON_SPACING_Y 10  //the vertical distance between button
-#define EDG_Y 10 //lower edge distance 
-#define EDG_X 20 //left and right distance
-
 #define YP A3  // must be an analog pin, use "An" notation!
 #define XM A2  // must be an analog pin, use "An" notation!
 #define YM 9   // can be a digital pin
 #define XP 8   // can be a digital pin
 
-//touch sensitivity for X
+//param calibration from kbv
 #define TS_MINX 906
 #define TS_MAXX 116
 
-//touch sensitivity for Y
-#define TS_MINY 92
+#define TS_MINY 92 
 #define TS_MAXY 952
 
-// We have a status line for like, is FONA working
-#define STATUS_X 10
-#define STATUS_Y 65
-
-//touch sensitivity for press
-#define MINPRESSURE 1
-#define MAXPRESSURE 10000
-
+// For better pressure precision, we need to know the resistance
+// between X+ and X- Use any multimeter to read it
+// For the one we're using, its 300 ohms across the X plate
 TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 
-typedef struct _button_info
-{
-     uint8_t button_name[10];
-     uint8_t button_name_size;
-     uint16_t button_name_colour;
-     uint16_t button_colour;
-     uint16_t button_x;
-     uint16_t button_y;     
- }button_info;
+#define  BLACK   0x0000
+#define BLUE    0x001F
+#define RED     0xF800
+#define GREEN   0x07E0
+#define CYAN    0x07FF
+#define MAGENTA 0xF81F
+#define YELLOW  0xFFE0
+#define WHITE   0xFFFF
 
-//the definition of buttons
-button_info phone_button[15] = 
-{
-  "1",4,BLACK,CYAN,EDG_X+BUTTON_R-1,my_lcd.Get_Display_Height()-EDG_Y-4*BUTTON_SPACING_Y-9*BUTTON_R-1,
-  "2",4,BLACK,CYAN,EDG_X+3*BUTTON_R+BUTTON_SPACING_X-1,my_lcd.Get_Display_Height()-EDG_Y-4*BUTTON_SPACING_Y-9*BUTTON_R-1,
-  "3",4,BLACK,CYAN,EDG_X+5*BUTTON_R+2*BUTTON_SPACING_X-1,my_lcd.Get_Display_Height()-EDG_Y-4*BUTTON_SPACING_Y-9*BUTTON_R-1,
-  "4",4,BLACK,CYAN,EDG_X+BUTTON_R-1,my_lcd.Get_Display_Height()-EDG_Y-3*BUTTON_SPACING_Y-7*BUTTON_R-1, 
-  "5",4,BLACK,CYAN,EDG_X+3*BUTTON_R+BUTTON_SPACING_X-1,my_lcd.Get_Display_Height()-EDG_Y-3*BUTTON_SPACING_Y-7*BUTTON_R-1,
-  "6",4,BLACK,CYAN,EDG_X+5*BUTTON_R+2*BUTTON_SPACING_X-1,my_lcd.Get_Display_Height()-EDG_Y-3*BUTTON_SPACING_Y-7*BUTTON_R-1,
-  "7",4,BLACK,CYAN,EDG_X+BUTTON_R-1,my_lcd.Get_Display_Height()-EDG_Y-2*BUTTON_SPACING_Y-5*BUTTON_R-1,
-  "8",4,BLACK,CYAN,EDG_X+3*BUTTON_R+BUTTON_SPACING_X-1,my_lcd.Get_Display_Height()-EDG_Y-2*BUTTON_SPACING_Y-5*BUTTON_R-1,
-  "9",4,BLACK,CYAN,EDG_X+5*BUTTON_R+2*BUTTON_SPACING_X-1,my_lcd.Get_Display_Height()-EDG_Y-2*BUTTON_SPACING_Y-5*BUTTON_R-1,
-  "*",4,BLACK,PINK,EDG_X+BUTTON_R-1,my_lcd.Get_Display_Height()-EDG_Y-BUTTON_SPACING_Y-3*BUTTON_R-1,
-  "0",4,BLACK,CYAN,EDG_X+3*BUTTON_R+BUTTON_SPACING_X-1,my_lcd.Get_Display_Height()-EDG_Y-BUTTON_SPACING_Y-3*BUTTON_R-1,
-  "#",4,BLACK,PINK,EDG_X+5*BUTTON_R+2*BUTTON_SPACING_X-1,my_lcd.Get_Display_Height()-EDG_Y-BUTTON_SPACING_Y-3*BUTTON_R-1,
-  "end",3,BLACK,RED,EDG_X+BUTTON_R-1,my_lcd.Get_Display_Height()-EDG_Y-BUTTON_R-1,
-  "call",3,BLACK,GREEN,EDG_X+3*BUTTON_R+BUTTON_SPACING_X-1,my_lcd.Get_Display_Height()-EDG_Y-BUTTON_R-1,
-  "dele",3,BLACK,LIGHTGREY,EDG_X+5*BUTTON_R+2*BUTTON_SPACING_X-1,my_lcd.Get_Display_Height()-EDG_Y-BUTTON_R-1,
-};
+uint16_t color_mask[] = {0xF800,0xFFE0,0x07E0,0x07FF,0x001F,0xF81F}; //color select
 
-//display string
+#define COLORBOXSIZE my_lcd.Get_Display_Width()/6
+#define PENBOXSIZE my_lcd.Get_Display_Width()/4
+
+int16_t old_color, current_color,flag_colour;
+int16_t old_pen,current_pen,flag_pen;
+boolean show_flag = true;
+
 void show_string(uint8_t *str,int16_t x,int16_t y,uint8_t csize,uint16_t fc, uint16_t bc,boolean mode)
 {
     my_lcd.Set_Text_Mode(mode);
@@ -130,53 +51,95 @@ void show_string(uint8_t *str,int16_t x,int16_t y,uint8_t csize,uint16_t fc, uin
     my_lcd.Print_String(str,x,y);
 }
 
-//Check whether to press or not
-boolean is_pressed(int16_t x1,int16_t y1,int16_t x2,int16_t y2,int16_t px,int16_t py)
+//show color select menu
+void show_color_select_menu(void)
 {
-    if((px > x1 && px < x2) && (py > y1 && py < y2))
-    {
-        return true;  
-    } 
-    else
-    {
-        return false;  
-    }
+   uint16_t i;
+   for(i = 0;i<6;i++)
+   {
+       my_lcd.Set_Draw_color(color_mask[i]);
+       my_lcd.Fill_Rectangle(i*COLORBOXSIZE, 0, (i+1)*COLORBOXSIZE-1, COLORBOXSIZE/2-1);
+   }  
+   my_lcd.Set_Draw_color(GREEN);
+   my_lcd.Fill_Round_Rectangle((my_lcd.Get_Display_Width()-20)/3+10, COLORBOXSIZE/2+2, (my_lcd.Get_Display_Width()-20)/3*2+10,COLORBOXSIZE/2+20, 5);
+   show_string("OK",CENTER,COLORBOXSIZE/2+4,2,RED, BLACK,1);
+}
+
+//show pen size select menu
+void show_pen_size_select_menu(void)
+{
+  uint16_t i;
+  my_lcd.Set_Text_Mode(1);
+  my_lcd.Set_Text_Size(2);
+  my_lcd.Set_Text_colour(GREEN);
+  my_lcd.Set_Text_Back_colour(BLACK);
+  for(i = 0;i<4;i++)
+  {
+      my_lcd.Print_Number_Int(i+1, 5+PENBOXSIZE*i, (COLORBOXSIZE/2-16)/2, 0, ' ',10);
+      my_lcd.Set_Draw_color(RED);
+      my_lcd.Fill_Rectangle(25+PENBOXSIZE*i, COLORBOXSIZE/2/2-i, PENBOXSIZE*(i+1)-10, COLORBOXSIZE/2/2+i);
+  }
+   my_lcd.Set_Draw_color(GREEN);
+   my_lcd.Fill_Round_Rectangle((my_lcd.Get_Display_Width()-20)/3+10, COLORBOXSIZE/2+2, (my_lcd.Get_Display_Width()-20)/3*2+10,COLORBOXSIZE/2+20, 5);
+   show_string("OK",CENTER,COLORBOXSIZE/2+4,2,RED, BLACK,1);
+}
+
+//show main menu
+void show_main_menu(void)
+{
+   my_lcd.Set_Draw_color(YELLOW);
+   my_lcd.Fill_Round_Rectangle(5, 0, (my_lcd.Get_Display_Width()-20)/3+5,COLORBOXSIZE/2+20, 5);
+   my_lcd.Fill_Round_Rectangle((my_lcd.Get_Display_Width()-20)/3*2+15, 0, (my_lcd.Get_Display_Width()-20)/3*3+15,COLORBOXSIZE/2+20, 5);
+   my_lcd.Set_Draw_color(MAGENTA);
+   my_lcd.Fill_Round_Rectangle((my_lcd.Get_Display_Width()-20)/3+10, 0, (my_lcd.Get_Display_Width()-20)/3*2+10,COLORBOXSIZE/2+20, 5);
+   show_string("COLOUR",5+((my_lcd.Get_Display_Width()-20)/3-72)/2-1,((COLORBOXSIZE/2+20)-16)/2,2,BLUE, BLACK,1);
+   show_string("CLEAR",(my_lcd.Get_Display_Width()-20)/3+10+((my_lcd.Get_Display_Width()-20)/3-60)/2-1,((COLORBOXSIZE/2+20)-16)/2,2,WHITE, BLACK,1);
+   show_string("PENSIZE",(my_lcd.Get_Display_Width()-20)/3*2+15+((my_lcd.Get_Display_Width()-20)/3-84)/2-1,((COLORBOXSIZE/2+20)-16)/2,2,BLUE, BLACK,1);
  }
 
-//display the main menu
-void show_menu(void)
-{
-    uint16_t i;
-   for(i = 0;i < sizeof(phone_button)/sizeof(button_info);i++)
-   {
-      my_lcd.Set_Draw_color(phone_button[i].button_colour);
-      my_lcd.Fill_Circle(phone_button[i].button_x, phone_button[i].button_y, BUTTON_R);
-      show_string(phone_button[i].button_name,phone_button[i].button_x-strlen(phone_button[i].button_name)*phone_button[i].button_name_size*6/2+phone_button[i].button_name_size/2+1,phone_button[i].button_y-phone_button[i].button_name_size*8/2+phone_button[i].button_name_size/2+1,phone_button[i].button_name_size,phone_button[i].button_name_colour,BLACK,1);
-   }
-   my_lcd.Set_Draw_color(BLACK);
-   my_lcd.Fill_Rectangle(1, 1, my_lcd.Get_Display_Width()-2, 3);
-   my_lcd.Fill_Rectangle(1, 45, my_lcd.Get_Display_Width()-2, 47);
-   my_lcd.Fill_Rectangle(1, 1, 3, 47);
-   my_lcd.Fill_Rectangle(my_lcd.Get_Display_Width()-4, 1, my_lcd.Get_Display_Width()-2, 47);
-}
-                            
 void setup(void) 
 {
   Serial.begin(9600);
-   my_lcd.Init_LCD();
-   my_lcd.Fill_Screen(BLUE); 
-   show_menu();
+  my_lcd.Init_LCD();
+  Serial.println(my_lcd.Read_ID(), HEX);
+  my_lcd.Fill_Screen(BLACK);
+  show_main_menu();
+  current_color = RED;
+  current_pen = 0;
+  pinMode(13, OUTPUT);
+/*
+  tft.fillRect(0, 0, BOXSIZE, BOXSIZE, RED);
+  tft.fillRect(BOXSIZE, 0, BOXSIZE, BOXSIZE, YELLOW);
+  tft.fillRect(BOXSIZE*2, 0, BOXSIZE, BOXSIZE, GREEN);
+  tft.fillRect(BOXSIZE*3, 0, BOXSIZE, BOXSIZE, CYAN);
+  tft.fillRect(BOXSIZE*4, 0, BOXSIZE, BOXSIZE, BLUE);
+  tft.fillRect(BOXSIZE*5, 0, BOXSIZE, BOXSIZE, MAGENTA);
+ 
+  tft.drawRect(0, 0, BOXSIZE, BOXSIZE, WHITE);
+  currentcolor = RED;
+ 
+  pinMode(13, OUTPUT);
+
+ //tft.fillRect(0, 80, 240, 20, RED);
+   tft.setCursor(0, 80);
+  
+  tft.setTextColor(RED);  tft.setTextSize(1);
+  tft.println("Hello World!");
+  tft.println(01234.56789);
+*/
 }
 
-uint16_t text_x=7,text_y=10,text_x_add = 6*phone_button[0].button_name_size,text_y_add = 8*phone_button[0].button_name_size;
-uint16_t n=0;
+#define MINPRESSURE 10
+#define MAXPRESSURE 1000
 
-void loop(void)
+void loop()
 {
-  uint16_t i;
+comme:
   digitalWrite(13, HIGH);
   TSPoint p = ts.getPoint();
   digitalWrite(13, LOW);
+  pinMode(XM, OUTPUT);
+  pinMode(YP, OUTPUT);
 
   Serial.print("x:");
   Serial.print(p.x);
@@ -185,59 +148,302 @@ void loop(void)
   Serial.print(" z:");
   Serial.println(p.z);
   
-  pinMode(XM, OUTPUT);
-  pinMode(YP, OUTPUT);
-  if (p.z > MINPRESSURE && p.z < MAXPRESSURE)
+  if (p.z > MINPRESSURE && p.z < MAXPRESSURE) 
   {
-    //p.x = my_lcd.Get_Display_Width()-map(p.x, TS_MINX, TS_MAXX, my_lcd.Get_Display_Width(), 0);
-    //p.y = my_lcd.Get_Display_Height()-map(p.y, TS_MINY, TS_MAXY, my_lcd.Get_Display_Height(), 0);
-    p.x = map(p.x, TS_MINX, TS_MAXX, my_lcd.Get_Display_Width(),0);
-    p.y = map(p.y, TS_MINY, TS_MAXY, my_lcd.Get_Display_Height(),0);
-    
-    for(i=0;i<sizeof(phone_button)/sizeof(button_info);i++)
-    {
-         //press the button
-         if(is_pressed(phone_button[i].button_x-BUTTON_R,phone_button[i].button_y-BUTTON_R,phone_button[i].button_x+BUTTON_R,phone_button[i].button_y+BUTTON_R,p.x,p.y))
+      if (p.y < (TS_MINY-5)) 
+      {
+          my_lcd.Set_Draw_color(BLACK);
+          my_lcd.Fill_Rectangle(0, COLORBOXSIZE, my_lcd.Get_Display_Width()-1, my_lcd.Get_Display_Height()-1);
+      }
+      //p.x = my_lcd.Get_Display_Width()-map(p.x, TS_MINX, TS_MAXX, my_lcd.Get_Display_Width(), 0);
+      //p.y = my_lcd.Get_Display_Height()-map(p.y, TS_MINY, TS_MAXY, my_lcd.Get_Display_Height(), 0);
+      p.x = map(p.x, TS_MINX, TS_MAXX, my_lcd.Get_Display_Width(), 0);
+      p.y = map(p.y, TS_MINY, TS_MAXY, my_lcd.Get_Display_Height(),0);
+         if(p.y < COLORBOXSIZE/2+20) 
          {
-              my_lcd.Set_Draw_color(DARKGREY);
-              my_lcd.Fill_Circle(phone_button[i].button_x, phone_button[i].button_y, BUTTON_R);
-              show_string(phone_button[i].button_name,phone_button[i].button_x-strlen(phone_button[i].button_name)*phone_button[i].button_name_size*6/2+phone_button[i].button_name_size/2+1,phone_button[i].button_y-phone_button[i].button_name_size*8/2+phone_button[i].button_name_size/2+1,phone_button[i].button_name_size,WHITE,BLACK,1);
-              delay(100);
-              my_lcd.Set_Draw_color(phone_button[i].button_colour);
-              my_lcd.Fill_Circle(phone_button[i].button_x, phone_button[i].button_y, BUTTON_R);
-              show_string(phone_button[i].button_name,phone_button[i].button_x-strlen(phone_button[i].button_name)*phone_button[i].button_name_size*6/2+phone_button[i].button_name_size/2+1,phone_button[i].button_y-phone_button[i].button_name_size*8/2+phone_button[i].button_name_size/2+1,phone_button[i].button_name_size,phone_button[i].button_name_colour,BLACK,1);  
-              if(i < 12)
+              if(((p.x>5)&&(p.x < ((my_lcd.Get_Display_Width()-20)/3+5)))&&!flag_pen) //select color
               {
-                  if(n < 13)
+                flag_colour = 1;
+                if(show_flag)
+                {
+                    my_lcd.Set_Draw_color(BLACK);
+                    my_lcd.Fill_Rectangle(0,0,my_lcd.Get_Display_Width()-1,COLORBOXSIZE/2+20);
+                    show_color_select_menu();
+                }
+                show_flag = false;
+                switch(current_color)
+                {
+                  case RED:
                   {
-                    show_string(phone_button[i].button_name,text_x,text_y,phone_button[i].button_name_size,GREENYELLOW, BLACK,1);
-                    text_x += text_x_add-1;
-                    n++;
+                    my_lcd.Set_Draw_color(WHITE);
+                    my_lcd.Draw_Rectangle(0, 0, COLORBOXSIZE-1, COLORBOXSIZE/2-1);
+                    break;  
                   }
-              }
-              else if(12 == i) //show calling ended
-              {
-                  my_lcd.Set_Draw_color(BLUE);
-                  my_lcd.Fill_Rectangle(0, 48, my_lcd.Get_Display_Width()-1, 60);
-                  show_string("Calling ended",CENTER,52,1,RED, BLACK,1);  
-              } 
-              else if(13 == i) //show calling
-              {
-                  my_lcd.Set_Draw_color(BLUE);
-                  my_lcd.Fill_Rectangle(0, 48, my_lcd.Get_Display_Width()-1, 60);
-                  show_string("Calling...",CENTER,52,1,GREEN, BLACK,1);  
-              }
-              else if(14 == i) //delete button
-              {
-                  if(n > 0)
+                  case YELLOW:
                   {
-                      my_lcd.Set_Draw_color(BLUE);
-                      text_x -= (text_x_add-1);  
-                      my_lcd.Fill_Rectangle(text_x, text_y, text_x+text_x_add-1, text_y+text_y_add-2);
-                      n--; 
+                       my_lcd.Set_Draw_color(WHITE);
+                       my_lcd.Draw_Rectangle(COLORBOXSIZE, 0, 2*COLORBOXSIZE-1, COLORBOXSIZE/2-1);
+                       break; 
                   }
+                  case GREEN:
+                  {
+                       my_lcd.Set_Draw_color(WHITE);
+                       my_lcd.Draw_Rectangle(2*COLORBOXSIZE, 0, 3*COLORBOXSIZE-1, COLORBOXSIZE/2-1);
+                       break; 
+                   }
+                  case CYAN:
+                  {
+                       my_lcd.Set_Draw_color(WHITE);
+                       my_lcd.Draw_Rectangle(3*COLORBOXSIZE, 0, 4*COLORBOXSIZE-1, COLORBOXSIZE/2-1);
+                       break;                 
+                  }
+                  case BLUE:
+                  {
+                       my_lcd.Set_Draw_color(WHITE);
+                       my_lcd.Draw_Rectangle(4*COLORBOXSIZE, 0, 5*COLORBOXSIZE-1, COLORBOXSIZE/2-1);
+                       break;   
+                  }
+                  case MAGENTA:  
+                  {
+                       my_lcd.Set_Draw_color(WHITE);
+                       my_lcd.Draw_Rectangle(5*COLORBOXSIZE, 0, 6*COLORBOXSIZE-1, COLORBOXSIZE/2-1);
+                       break;   
+                  }
+                  default:
+                      break;
+                }
+             }
+             if(flag_colour)
+             {
+                 if(p.y < COLORBOXSIZE/2)
+                 {
+                    old_color = current_color;
+                    if (p.x < COLORBOXSIZE) 
+                    { 
+                        current_color = RED; 
+                        my_lcd.Set_Draw_color(WHITE);
+                        my_lcd.Draw_Rectangle(0, 0, COLORBOXSIZE-1, COLORBOXSIZE/2-1);
+                    } 
+                    else if (p.x < COLORBOXSIZE*2) 
+                    {
+                        current_color = YELLOW;
+                        my_lcd.Set_Draw_color(WHITE);
+                        my_lcd.Draw_Rectangle(COLORBOXSIZE, 0, 2*COLORBOXSIZE-1, COLORBOXSIZE/2-1);
+                    } 
+                    else if (p.x < COLORBOXSIZE*3) 
+                    {
+                        current_color = GREEN;
+                        my_lcd.Set_Draw_color(WHITE);
+                        my_lcd.Draw_Rectangle(2*COLORBOXSIZE, 0, 3*COLORBOXSIZE-1, COLORBOXSIZE/2-1);
+                    } 
+                    else if (p.x < COLORBOXSIZE*4) 
+                    {
+                        current_color = CYAN;
+                        my_lcd.Set_Draw_color(WHITE);
+                        my_lcd.Draw_Rectangle(3*COLORBOXSIZE, 0, 4*COLORBOXSIZE-1, COLORBOXSIZE/2-1);
+                    } 
+                    else if (p.x < COLORBOXSIZE*5) 
+                    {
+                        current_color = BLUE;
+                        my_lcd.Set_Draw_color(WHITE);
+                        my_lcd.Draw_Rectangle(4*COLORBOXSIZE, 0, 5*COLORBOXSIZE-1, COLORBOXSIZE/2-1);
+                    } 
+                    else if (p.x < COLORBOXSIZE*6) 
+                    {
+                        current_color = MAGENTA;
+                        my_lcd.Set_Draw_color(WHITE);
+                        my_lcd.Draw_Rectangle(5*COLORBOXSIZE, 0, 6*COLORBOXSIZE-1, COLORBOXSIZE/2-1);
+                    }
+                    if(old_color != current_color)
+                    {
+                        switch(old_color)
+                        {
+                            case RED:
+                            {
+                              my_lcd.Set_Draw_color(RED);
+                              my_lcd.Draw_Rectangle(0, 0, COLORBOXSIZE-1, COLORBOXSIZE/2-1);
+                              break;  
+                            }
+                            case YELLOW:
+                            {
+                                 my_lcd.Set_Draw_color(YELLOW);
+                                 my_lcd.Draw_Rectangle(COLORBOXSIZE, 0, 2*COLORBOXSIZE-1, COLORBOXSIZE/2-1);
+                                 break; 
+                            }
+                            case GREEN:
+                            {
+                                 my_lcd.Set_Draw_color(GREEN);
+                                 my_lcd.Draw_Rectangle(2*COLORBOXSIZE, 0, 3*COLORBOXSIZE-1, COLORBOXSIZE/2-1);
+                                 break; 
+                             }
+                            case CYAN:
+                            {
+                                 my_lcd.Set_Draw_color(CYAN);
+                                 my_lcd.Draw_Rectangle(3*COLORBOXSIZE, 0, 4*COLORBOXSIZE-1, COLORBOXSIZE/2-1);
+                                 break;                 
+                            }
+                            case BLUE:
+                            {
+                                 my_lcd.Set_Draw_color(BLUE);
+                                 my_lcd.Draw_Rectangle(4*COLORBOXSIZE, 0, 5*COLORBOXSIZE-1, COLORBOXSIZE/2-1);
+                                 break;   
+                            }
+                            case MAGENTA:  
+                            {
+                                 my_lcd.Set_Draw_color(MAGENTA);
+                                 my_lcd.Draw_Rectangle(5*COLORBOXSIZE, 0, 6*COLORBOXSIZE-1, COLORBOXSIZE/2-1);
+                                 break;   
+                            }
+                            default:
+                                break;                        
+                        }
+                    }
+                }
+                else if(p.y < COLORBOXSIZE/2+20)
+                {
+                     if((p.x>(my_lcd.Get_Display_Width()-20)/3+10)&&(p.x<(my_lcd.Get_Display_Width()-20)/3*2+10))
+                     {
+                         my_lcd.Set_Draw_color(BLACK);
+                         my_lcd.Fill_Rectangle(0,0,my_lcd.Get_Display_Width()-1,COLORBOXSIZE/2+20);
+                         show_main_menu();
+                         flag_colour = 0;
+                         show_flag = true;
+                         goto comme;
+                     }
+                }
+            }
+            if(((p.x>((my_lcd.Get_Display_Width()-20)/3*2+15))&&(p.x < (((my_lcd.Get_Display_Width()-20)/3*3+15))))&&!flag_colour) //select pen size
+            {
+                flag_pen = 1;
+                if(show_flag)
+                {
+                    my_lcd.Set_Draw_color(BLACK);
+                    my_lcd.Fill_Rectangle(0,0,my_lcd.Get_Display_Width()-1,COLORBOXSIZE/2+20);
+                    show_pen_size_select_menu();
+                }
+                show_flag = false;
+                switch(current_pen)
+                {
+                   case 0:
+                   {
+                       my_lcd.Set_Draw_color(WHITE);
+                       my_lcd.Draw_Rectangle(0, 0, PENBOXSIZE-1, COLORBOXSIZE/2-1);
+                       break;
+                   }
+                   case 1:
+                   {
+                       my_lcd.Set_Draw_color(WHITE);
+                       my_lcd.Draw_Rectangle(PENBOXSIZE, 0, 2*PENBOXSIZE-1, COLORBOXSIZE/2-1);
+                       break; 
+                   }
+                   case 2:
+                   {
+                       my_lcd.Set_Draw_color(WHITE);
+                       my_lcd.Draw_Rectangle(2*PENBOXSIZE, 0, 3*PENBOXSIZE-1, COLORBOXSIZE/2-1);
+                       break;   
+                   }
+                   case 3:  
+                   {
+                       my_lcd.Set_Draw_color(WHITE);
+                       my_lcd.Draw_Rectangle(3*PENBOXSIZE, 0, 4*PENBOXSIZE-1, COLORBOXSIZE/2-1);
+                       break;                
+                   }
+                   default:
+                       break;
+                  }              
               }
-         }      
-     }
+              if(flag_pen)
+              {
+                   if(p.y < COLORBOXSIZE/2)
+                   {
+                      old_pen = current_pen;
+                      if(p.x < PENBOXSIZE)
+                      {
+                          current_pen = 0;
+                          my_lcd.Set_Draw_color(WHITE);
+                          my_lcd.Draw_Rectangle(0, 0, PENBOXSIZE-1, COLORBOXSIZE/2-1);
+                      }
+                      else if(p.x < 2*PENBOXSIZE)
+                      {
+                          current_pen = 1;
+                          my_lcd.Set_Draw_color(WHITE);
+                          my_lcd.Draw_Rectangle(PENBOXSIZE, 0, 2*PENBOXSIZE-1, COLORBOXSIZE/2-1);
+                       }
+                       else if(p.x < 3*PENBOXSIZE) 
+                       {
+                           current_pen = 2;
+                           my_lcd.Set_Draw_color(WHITE);
+                           my_lcd.Draw_Rectangle(2*PENBOXSIZE, 0, 3*PENBOXSIZE-1, COLORBOXSIZE/2-1);
+                       }
+                       else if(p.x < 4*PENBOXSIZE)
+                       {
+                           current_pen = 3;
+                           my_lcd.Set_Draw_color(WHITE);
+                           my_lcd.Draw_Rectangle(3*PENBOXSIZE, 0, 4*PENBOXSIZE-1, COLORBOXSIZE/2-1);               
+                       }
+                       if(old_pen != current_pen)
+                       {
+                           switch(old_pen)
+                           {
+                                 case 0:
+                                 {
+                                     my_lcd.Set_Draw_color(BLACK);
+                                     my_lcd.Draw_Rectangle(0, 0, PENBOXSIZE-1, COLORBOXSIZE/2-1);
+                                     break;
+                                 }
+                                 case 1:
+                                 {
+                                     my_lcd.Set_Draw_color(BLACK);
+                                     my_lcd.Draw_Rectangle(PENBOXSIZE, 0, 2*PENBOXSIZE-1, COLORBOXSIZE/2-1);
+                                     break; 
+                                 }
+                                 case 2:
+                                 {
+                                     my_lcd.Set_Draw_color(BLACK);
+                                     my_lcd.Draw_Rectangle(2*PENBOXSIZE, 0, 3*PENBOXSIZE-1, COLORBOXSIZE/2-1);
+                                     break;   
+                                 }
+                                 case 3:  
+                                 {
+                                     my_lcd.Set_Draw_color(BLACK);
+                                     my_lcd.Draw_Rectangle(3*PENBOXSIZE, 0, 4*PENBOXSIZE-1, COLORBOXSIZE/2-1);
+                                     break;                
+                                 }
+                                 default:
+                                     break;           
+                           }      
+                       }
+                   }
+                   else if(p.y < COLORBOXSIZE/2+20)
+                   {
+                       if((p.x>(my_lcd.Get_Display_Width()-20)/3+10)&&(p.x<(my_lcd.Get_Display_Width()-20)/3*2+10))
+                       {
+                          my_lcd.Set_Draw_color(BLACK);
+                          my_lcd.Fill_Rectangle(0,0,my_lcd.Get_Display_Width()-1,COLORBOXSIZE/2+20);
+                          show_main_menu();
+                          flag_pen = 0;
+                          show_flag = true;
+                          goto comme;
+                       }  
+                   }
+              }
+              if(((p.x>((my_lcd.Get_Display_Width()-20)/3+10))&&(p.x < ((my_lcd.Get_Display_Width()-20)/3*2+10)))&&!flag_colour&&!flag_pen)
+              {
+                  my_lcd.Set_Draw_color(BLACK);  
+                  my_lcd.Fill_Rectangle(0,COLORBOXSIZE,my_lcd.Get_Display_Width()-1,my_lcd.Get_Display_Height()-1);
+              }
+         }
+      if (((p.y-current_pen) > COLORBOXSIZE/2+20) && ((p.y+current_pen) < my_lcd.Get_Display_Height()))  //drawing
+      {
+        my_lcd.Set_Draw_color(current_color);
+       // if(1 == current_pen)
+     //   {
+      //      my_lcd.Draw_Pixel(p.x,  p.y);
+     //   }
+     //   else 
+     //   {
+          my_lcd.Fill_Circle(p.x,  p.y,current_pen);
+      //  }
+    }
   }
 }
