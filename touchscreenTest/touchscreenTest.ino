@@ -13,11 +13,11 @@ LCDWIKI_KBV my_lcd(ILI9486,A3,A2,A1,A0,A4); //model,cs,cd,wr,rd,reset
 #define XP 8   // can be a digital pin
 
 //param calibration from kbv
-#define TS_MINX 906
-#define TS_MAXX 116
+#define LEFT 130
+#define RIGHT 854
 
-#define TS_MINY 92 
-#define TS_MAXY 952
+#define TOP 797
+#define BOT 376
 
 // For better pressure precision, we need to know the resistance
 // between X+ and X- Use any multimeter to read it
@@ -150,15 +150,18 @@ comme:
   
   if (p.z > MINPRESSURE && p.z < MAXPRESSURE) 
   {
-      if (p.y < (TS_MINY-5)) 
+      if (p.y < (TOP-5)) 
       {
           my_lcd.Set_Draw_color(BLACK);
           my_lcd.Fill_Rectangle(0, COLORBOXSIZE, my_lcd.Get_Display_Width()-1, my_lcd.Get_Display_Height()-1);
       }
       //p.x = my_lcd.Get_Display_Width()-map(p.x, TS_MINX, TS_MAXX, my_lcd.Get_Display_Width(), 0);
       //p.y = my_lcd.Get_Display_Height()-map(p.y, TS_MINY, TS_MAXY, my_lcd.Get_Display_Height(), 0);
-      p.x = map(p.x, TS_MINX, TS_MAXX, my_lcd.Get_Display_Width(), 0);
-      p.y = map(p.y, TS_MINY, TS_MAXY, my_lcd.Get_Display_Height(),0);
+      p.x = map(p.x, LEFT, RIGHT, 0, my_lcd.Get_Display_Width());
+      p.y = map(p.y, TOP, BOT, 0, my_lcd.Get_Display_Height());
+      
+      //p.x = map(p.x, TS_MINX, TS_MAXX, my_lcd.Get_Display_Width(), 0);
+      //p.y = map(p.y, TS_MINY, TS_MAXY, my_lcd.Get_Display_Height(),0);   
          if(p.y < COLORBOXSIZE/2+20) 
          {
               if(((p.x>5)&&(p.x < ((my_lcd.Get_Display_Width()-20)/3+5)))&&!flag_pen) //select color
