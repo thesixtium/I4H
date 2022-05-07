@@ -112,25 +112,25 @@ void loop() {
   
   if (p.z > MINPRESSURE && p.z < MAXPRESSURE) 
   {
-      if (p.y < (TOP-5)) 
-      {
-          my_lcd.Set_Draw_color(BLACK);
-          my_lcd.Fill_Rectangle(0, COLORBOXSIZE, my_lcd.Get_Display_Width()-1, my_lcd.Get_Display_Height()-1);
-      }
+      //if (p.y < (TOP-5)) 
+    //  {
+    //      my_lcd.Set_Draw_color(BLACK);
+    //      my_lcd.Fill_Rectangle(0, COLORBOXSIZE, my_lcd.Get_Display_Width()-1, my_lcd.Get_Display_Height()-1);
+     // }
       p.x = map(p.x, LEFT, RIGHT, 0, my_lcd.Get_Display_Width());
       p.y = map(p.y, TOP, BOT, 0, my_lcd.Get_Display_Height());
 
-      if (((p.y-current_pen) > COLORBOXSIZE/2+20) && ((p.y+current_pen) < my_lcd.Get_Display_Height()))  //drawing
-      {
-        my_lcd.Set_Draw_color(current_color);
+      //if (((p.y-current_pen) > COLORBOXSIZE/2+20) && ((p.y+current_pen) < my_lcd.Get_Display_Height()))  //drawing
+      //{
+      //  my_lcd.Set_Draw_color(current_color);
        // if(1 == current_pen)
      //   {
-            my_lcd.Draw_Pixel(p.x,  p.y);
+           // my_lcd.Draw_Pixel(p.x,  p.y);
      //   }
      //   else
      //   {
           //my_lcd.Fill_Circle(p.x, p.y, current_pen);
       //  }
-    }
+    //}
   }
 }
