@@ -53,7 +53,7 @@ void show_string(uint8_t *str,int16_t x,int16_t y,uint8_t csize,uint16_t fc, uin
 
 void setup(void) 
 {
-  Wire.begin(A5, A6);
+  Wire.begin((A5, A6));
   Wire.beginTransmission(MPU);
   Wire.write(0x6B); 
   Wire.write(0);    
@@ -89,19 +89,19 @@ void loop() {
   GyY=Wire.read()<<8|Wire.read();  
   GyZ=Wire.read()<<8|Wire.read();
 
-  Serial.print("Touchscreen x:");
-  Serial.print(p.x);
-  Serial.print("Touchscreen y:");
-  Serial.print(p.y);
-  Serial.print("Touchscreen z:");
-  Serial.println(p.z);
-
-  Serial.print("Accelerometer x:"); 
-  Serial.print(AcX);
-  Serial.print("Accelerometer y:"); 
-  Serial.print(AcY);
-  Serial.print("Accelerometer z:"); 
-  Serial.println(AcZ); 
+  Serial.print("tX: ");
+  Serial.print(p.x); // Touchscreen X
+  Serial.print(" tY: ");
+  Serial.print(p.y); // Touchscreen Y
+  Serial.print(" tZ: ");
+  Serial.print(p.z); // Touchscreen Z
+  Serial.print(" aX: "); 
+  Serial.print(AcX); // Accelerometer X
+  Serial.print(" aY: "); 
+  Serial.print(AcY); // Accelerometer Y
+  Serial.print(" aZ: "); 
+  Serial.print(AcZ); // Accelerometer Z
+  Serial.println(" endLine ");
   
   // Serial.print("Gyroscope x:"); 
   // Serial.print(GyX);
